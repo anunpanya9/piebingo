@@ -27,7 +27,9 @@ body {
 		font-size:250px;	
 	}
 </style>
-
+<div>
+	กรอกจำนวนวินาที: <input type="number" width="50px" id="secondsInput" min="0" value="60"/><button onclick="btStartFunction()">Start</button><button onclick="btStopFunction()">Stop</button>
+</div>
 <p id="status_connect"><font style="color:#c0c0c0">Offline</font></p>
 <p><img src="img/netpie.png" /></p>
 <p>
@@ -66,7 +68,7 @@ body {
 		appid = parameters_string[0];
 		appkey = parameters_string[1];
 		appsecret = parameters_string[2];
-		makeCode("http://rawgit.com/anunpanya/piebingo/master/client.html#"+appid+":"+appkey+":"+appsecret);
+		makeCode("http://rawgit.com/anunpanya9/piebingo/master/client.html#"+appid+":"+appkey+":"+appsecret);
 	}else{
 		document.getElementById("nplayer").innerHTML = 'appid or auth invalid<br>http://'+window.location.host+window.location.pathname+'#APPID:KEY:SECRET';
 	}
@@ -87,7 +89,7 @@ body {
 	var playerMax = 20;
 	var rage = 50;
 	var timespeed = 5000;
-	var time=15;
+	var time=180;
 
 	var start = 0;
 	var myName="";
@@ -179,6 +181,9 @@ body {
 				document.getElementById("countdown").innerHTML = "Wait "+time+" sec.";
 				microgear.publish("/bingo/server","time|"+time);
 				time--;
+			}else{
+				clearInterval(serverStartCountdown);
+				alert("None Player!!!");
 			}
 		}else{
 			start = 1;
@@ -199,6 +204,18 @@ body {
 
 	function stopFunction() {
 	    clearInterval(serverStartBingo);
+	}
+
+	function btStartFunction(){
+		clearInterval(serverStartCountdown);
+		time = document.getElementById("secondsInput").value;
+		serverStartCountdown = setInterval(function(){
+			serverStartFunction();
+		},1000);
+	}
+
+	function btStopFunction(){
+		clearInterval(serverStartCountdown);
 	}
 
 	function startFunction(){
@@ -240,8 +257,8 @@ body {
 		var msg = data.split('|');
 		if(msg[0]=="client" && typeof(msg[1])=="string" && start==0){
 			if(client.indexOf(msg[1])==-1){
-				clearInterval(serverStartCountdown);
-				time=15;
+				// clearInterval(serverStartCountdown);
+				// time=document.getElementById("secondsInput").value;
 				client.push(msg[1]);
 				document.getElementById("displays").style.display = "block";
 				document.getElementById("nplayer").innerHTML = client.length+" Player";
@@ -266,9 +283,9 @@ body {
 				bingoClients.push(bingoClient);
 				if (playerMax!=0 && client.length == playerMax) time=0;
 
-				serverStartCountdown = setInterval(function(){
-					serverStartFunction();
-				},1000);
+				// serverStartCountdown = setInterval(function(){
+				// 	serverStartFunction();
+				// },1000);
 			}
 		}else if(msg[0]=="check" && typeof(msg[1])=="string" && start==1){
 			var result = checkClient(msg[1],msg[2]);
